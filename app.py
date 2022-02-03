@@ -1,25 +1,24 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from googletrans import Translator
+from googletrans import Translator #pip install googletrans==4.0.0-rc1
 
 app = Flask(__name__)
 CORS(app)
 
 ListOfMessages = []
+translator = Translator()
+
 
 def trans(text):
-    translator = Translator()
     result=""
     result = translator.translate(text, src='ru', dest='en')
     return result.text
-@app.route('/trans', methods=['POST'])
-def foo():
-    text = request.json
-    text = text['text']
-    print(text)
+
+def retrans(text):
     result=""
-    result=trans(text)
-    return jsonify(result), 200, {'Content-Type': 'application/json'}
+    result = translator.translate(text, src='en', dest='ru')
+    return result.text
+
 
 @app.route('/')
 def dafault_route():
@@ -51,6 +50,15 @@ def GetMessage(id):
     else:
         return "Not found", 400
 
+@app.route('/trans', methods=['POST'])
+def rtrans():
+    text = request.json
+    text = text['text']
+    print(text)
+    result=""
+    result=retrans(text)
+    return jsonify(result), 200, {'Content-Type': 'application/json'}
+
 @app.route('/status')
 def status():
     allmessages = ""
@@ -59,7 +67,8 @@ def status():
     allmessages +=f'<br> Count of Messages {len(ListOfMessages)}'
     return allmessages
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
 
+    app.run(host='0.0.0.0')
+app.run(host='0.0.0.0')
 
 
